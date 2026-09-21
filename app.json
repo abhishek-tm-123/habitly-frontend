@@ -1,16 +1,17 @@
 {
   "expo": {
-    "name": "habit-tracker-mobile",
-    "slug": "habit-tracker-mobile",
+    "name": "Habitly",
+    "slug": "habitly",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/habitly.png",
     "scheme": "habittrackermobile",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/habitly.png"
     },
     "android": {
+      "package": "com.abhishektm.habitly",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -28,15 +29,22 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#F4F7FB",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 120
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "55587d86-1968-4beb-9a59-edef325a7037"
+      }
     }
   }
 }

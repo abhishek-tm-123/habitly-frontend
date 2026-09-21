@@ -1,98 +1,113 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Redirect } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { getToken } from "../services/authStorage";
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
+export default function Index() {
+  const [checking, setChecking] = useState(true);
+  const [hasToken, setHasToken] = useState(false);
+
+  useEffect(() => {
+    async function startApp() {
+      try {
+        // Keep splash screen visible for a moment
+        await new Promise((resolve) =>
+          setTimeout(resolve, 1500)
+        );
+
+        const token = await getToken();
+
+        setHasToken(!!token);
+      } catch (error) {
+        console.log(
+          "AUTH CHECK ERROR:",
+          error instanceof Error
+            ? error.message
+            : String(error)
+        );
+
+        setHasToken(false);
+      } finally {
+        setChecking(false);
+      }
+    }
+
+    startApp();
+  }, []);
+
+  // Splash screen
+  if (checking) {
     return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
+      <View style={styles.container}>
+        <View style={styles.logoContainer}>
+          <Text style={styles.logo}>Habitly</Text>
+
+          <Text style={styles.tagline}>
+            Build better habits
+          </Text>
+        </View>
+
+        <ActivityIndicator
+          size="small"
+          color="#2563EB"
+          style={styles.loader}
+        />
+
+        <Text style={styles.loadingText}>
+          Loading...
+        </Text>
+      </View>
     );
   }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+  // User is logged in
+  if (hasToken) {
+    return <Redirect href="/home" />;
+  }
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
-  );
+  // User is not logged in
+  return <Redirect href="/login" />;
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    backgroundColor: "#F4F7FB",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+
+  logoContainer: {
+    alignItems: "center",
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+
+  logo: {
+    fontSize: 40,
+    fontWeight: "800",
+    color: "#2563EB",
+    letterSpacing: -1,
   },
-  title: {
-    textAlign: 'center',
+
+  tagline: {
+    marginTop: 8,
+    fontSize: 15,
+    color: "#6B7280",
   },
-  code: {
-    textTransform: 'uppercase',
+
+  loader: {
+    marginTop: 40,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+
+  loadingText: {
+    marginTop: 10,
+    fontSize: 13,
+    color: "#9CA3AF",
   },
 });
