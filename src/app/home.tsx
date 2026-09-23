@@ -145,6 +145,24 @@ export default function HomeScreen() {
   }
   };
 
+  const confirmDelete = (habitId: number) => {
+  Alert.alert(
+    "Delete Habit",
+    "Are you sure you want to delete this habit?",
+    [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => handleDeleteHabit(habitId),
+      },
+    ]
+  );
+};
+
   const handleLogout = async () => {
     try {
       await removeToken();
@@ -326,7 +344,7 @@ export default function HomeScreen() {
                     </Text>
                   </View>
                   <TouchableOpacity
-                    onPress={() => handleDeleteHabit(habit.id)}
+                    onPress={() => confirmDelete(habit.id)}
                     activeOpacity={0.7}
                   >
                     <Text>Delete</Text>
