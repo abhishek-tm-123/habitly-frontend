@@ -7,7 +7,10 @@ import {
   View,
 } from "react-native";
 
-import { getToken } from "../services/authStorage";
+import {
+  getAccessToken,
+  getRefreshToken,
+} from "../services/authStorage";
 
 export default function Index() {
   const [checking, setChecking] = useState(true);
@@ -16,14 +19,22 @@ export default function Index() {
   useEffect(() => {
     async function startApp() {
       try {
-        // Keep splash screen visible for a moment
         await new Promise((resolve) =>
           setTimeout(resolve, 1500)
         );
 
-        const token = await getToken();
+        const accessToken = await getAccessToken();
+        const refreshToken = await getRefreshToken();
 
-        setHasToken(!!token);
+        // No tokens → login
+        if (!accessToken && !refreshToken) {
+          setHasToken(false);
+          return;
+        }
+
+        // At least one token exists → let API layer
+        // handle access-token refresh when necessary.
+        setHasToken(true);
       } catch (error) {
         console.log(
           "AUTH CHECK ERROR:",
@@ -41,7 +52,6 @@ export default function Index() {
     startApp();
   }, []);
 
-  // Splash screen
   if (checking) {
     return (
       <View style={styles.container}>
@@ -66,12 +76,10 @@ export default function Index() {
     );
   }
 
-  // User is logged in
   if (hasToken) {
     return <Redirect href="/home" />;
   }
 
-  // User is not logged in
   return <Redirect href="/login" />;
 }
 

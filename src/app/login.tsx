@@ -13,7 +13,7 @@ import {
 import { router } from "expo-router";
 
 import { login } from "@/services/api";
-import { saveToken } from "@/services/authStorage";
+import { saveTokens } from "@/services/authStorage";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -31,7 +31,7 @@ export default function LoginScreen() {
 
       const data = await login(email.trim(), password);
 
-      await saveToken(data.access_token);
+      await saveTokens(data.access_token,data.refresh_token);
 
       router.replace("/home");
     } catch (error) {

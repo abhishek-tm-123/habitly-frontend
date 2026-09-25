@@ -1,5 +1,6 @@
-import { getToken } from "./authStorage";
+import { getAccessToken,getRefreshToken,saveTokens } from "./authStorage";
 
+import { apiRequest } from "./apiClient";
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export async function signup(
@@ -41,6 +42,7 @@ export async function signup(
     return data;
 }
 
+
 export async function login(
   email: string,
   password: string
@@ -81,17 +83,10 @@ export async function login(
 }
 
 export async function getMe() {
-  const token = await getToken();
+  
 
-  if(!token){
-    throw new Error("No authentication token found");
-  }
-
-  const response = await fetch(`${API_URL}/auth/me`,{
-    method: 'GET',
-    headers:{
-      Authorization:`Bearer ${token}`,
-    },
+  const response = await apiRequest("/auth/me",{
+    method:"GET",
   });
 
   const data = await response.json();
@@ -114,21 +109,12 @@ export async function getMe() {
 }
 
 export async function getHabits(){
-  const token = await getToken();
+  
 
-  if (!token) {
-    throw new Error("No authentication token found")
+  const response = await apiRequest("/habits/",{
+    method:"GET",
+  })
 
-  }
-
-  const response = await fetch(`${API_URL}/habits/`,
-    {
-      method:"GET",
-      headers:{
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
 
   const data = await response.json();
 
@@ -151,26 +137,19 @@ export async function getHabits(){
 }
 
 export async function createHabit(name: string) {
-  const token = await getToken();
+  
 
-  if (!token) {
-    throw new Error("No authentication token found");
-  }
 
-  const response = await fetch(`${API_URL}/habits/`, {
-    method: "POST",
-
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-
+  const response = await apiRequest("/habits/",{
+    method:"POST",
     body: JSON.stringify({
       name,
-    }),
-  });
+    })
+  })
+  console.log(JSON.stringify({name,}))
 
   const data = await response.json();
+  
 
   if (!response.ok) {
     let message = "Failed to create habit";
@@ -180,9 +159,11 @@ export async function createHabit(name: string) {
     } else if (Array.isArray(data.detail)) {
       message = data.detail[0]?.msg || "Invalid input";
     }
-
+    console.log(message)
     throw new Error(message);
+    
   }
+
 
   return data;
 }
@@ -191,27 +172,17 @@ export async function updateHabit(
   habitId: number,
   completed: boolean
 ) {
-  const token = await getToken();
+  
 
-  if (!token) {
-    throw new Error("No authentication token found");
-  }
-
-  const response = await fetch(
-    `${API_URL}/habits/${habitId}`,
+  const response = await apiRequest(
+    `/habits/${habitId}`,
     {
-      method: "PATCH",
-
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-
-      body: JSON.stringify({
-        completed,
-      }),
+      method:"PATCH",
+      body:JSON.stringify({
+        completed
+      })
     }
-  );
+  )
 
   const data = await response.json();
 
@@ -231,19 +202,14 @@ export async function updateHabit(
 }
 
 export async function deleteHabit(habitId: number) {
-  const token = await getToken();
+  
 
-  if (!token) {
-    throw new Error("Not authenticated");
-  }
-
-  const response = await fetch(`${API_URL}/habits/${habitId}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
+  const response = await apiRequest(`/habits/${habitId}`,
+    {
+      method:"DELETE"
+    }
+  );
+  
   if (!response.ok) {
     let message = "Failed to delete habit";
 

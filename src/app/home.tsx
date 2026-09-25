@@ -20,7 +20,7 @@ import {
   deleteHabit,
 } from "../services/api";
 
-import { removeToken } from "../services/authStorage";
+import { removeTokens } from "../services/authStorage";
 
 export default function HomeScreen() {
   const [habits, setHabits] = useState<any[]>([]);
@@ -165,7 +165,7 @@ export default function HomeScreen() {
 
   const handleLogout = async () => {
     try {
-      await removeToken();
+      await removeTokens();
       router.replace("/login");
     } catch (error) {
       Alert.alert(
